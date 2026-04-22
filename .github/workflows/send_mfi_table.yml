@@ -22,7 +22,6 @@ jobs:
 
       - name: Run script
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-          SLACK_MY_USER_ID: ${{ secrets.SLACK_MY_USER_ID }}
+          WEBHOOK_MY_DM: ${{ secrets.WEBHOOK_MY_DM }}
+          WEBHOOK_CHANNEL: ${{ secrets.WEBHOOK_CHANNEL }}
         run: python main.py

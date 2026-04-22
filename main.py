@@ -1,6 +1,7 @@
 import os
 import psycopg2
-from slack_sdk import WebClient
+import urllib.request
+import json
 from datetime import datetime, timedelta
 import pytz
 
@@ -12,8 +13,8 @@ DB_NAME = "fusion_finance_mfi"
 DB_USER = "readonly"
 DB_PASS = "readonly"
 
-SLACK_TOKEN = os.environ["SLACK_BOT_TOKEN"]
-SLACK_CHANNELS = [os.environ["SLACK_CHANNEL_ID"], os.environ["SLACK_MY_USER_ID"]]
+WEBHOOK_MY_DM   = os.environ["WEBHOOK_MY_DM"]
+WEBHOOK_CHANNEL = os.environ["WEBHOOK_CHANNEL"]
 
 HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 HOUR_LABELS = [
@@ -34,7 +35,7 @@ def get_last_7_days():
 
 def fetch_data(dates):
     start = f"{dates[0]} 09:00:00"
-    end = f"{dates[-1]} 19:00:00"
+    end   = f"{dates[-1]} 19:00:00"
 
     query = """
         SELECT
@@ -71,15 +72,15 @@ def fetch_data(dates):
 
 def format_slack_message(dates, data):
     now_ist = datetime.now(IST)
-    today = now_ist.date()
+    today   = now_ist.date()
 
-    col_width = 10
+    col_width   = 10
     date_labels = [d.strftime("%d %b") for d in dates]
 
-    header = f"{'Hour':<12}" + "".join(f"{d:>{col_width}}" for d in date_labels)
+    header    = f"{'Hour':<12}" + "".join(f"{d:>{col_width}}" for d in date_labels)
     separator = "-" * len(header)
 
-    rows = []
+    rows   = []
     totals = {str(d): 0 for d in dates}
 
     for hour, label in zip(HOURS, HOUR_LABELS):
@@ -93,8 +94,7 @@ def format_slack_message(dates, data):
         rows.append(row)
 
     total_row = f"{'TOTAL':<12}" + "".join(f"{totals[str(d)]:>{col_width}}" for d in dates)
-
-    table = "\n".join([header, separator] + rows + [separator, total_row])
+    table     = "\n".join([header, separator] + rows + [separator, total_row])
 
     message = (
         f":bar_chart: *MFI AI Call Execution Table* — "
@@ -107,21 +107,25 @@ def format_slack_message(dates, data):
 
 
 def send_to_slack(message):
-    client = WebClient(token=SLACK_TOKEN)
-    for channel in SLACK_CHANNELS:
-        client.chat_postMessage(channel=channel, text=message)
-        print(f"Message sent to {channel}.")
+    payload = json.dumps({"text": message}).encode()
+    for name, url in [("My DM", WEBHOOK_MY_DM), ("Channel", WEBHOOK_CHANNEL)]:
+        req = urllib.request.Request(
+            url, data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        resp = urllib.request.urlopen(req)
+        print(f"Sent to {name}: {resp.status}")
 
 
 def main():
-    # Business hours check disabled during testing — re-enable after verification
-    # if not is_within_business_hours():
-    #     print("Outside business hours (9AM–7PM IST). Skipping.")
-    #     return
+    if not is_within_business_hours():
+        print("Outside business hours (9AM–7PM IST). Skipping.")
+        return
 
     dates = get_last_7_days()
     print(f"Fetching data for {dates[0]} to {dates[-1]}...")
-    data = fetch_data(dates)
+    data    = fetch_data(dates)
     message = format_slack_message(dates, data)
     send_to_slack(message)
 

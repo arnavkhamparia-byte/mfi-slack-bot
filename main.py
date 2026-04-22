@@ -13,7 +13,7 @@ DB_USER = "readonly"
 DB_PASS = "readonly"
 
 SLACK_TOKEN = os.environ["SLACK_BOT_TOKEN"]
-SLACK_CHANNEL = os.environ["SLACK_CHANNEL_ID"]
+SLACK_CHANNELS = [os.environ["SLACK_CHANNEL_ID"], os.environ["SLACK_MY_USER_ID"]]
 
 HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 HOUR_LABELS = [
@@ -108,8 +108,9 @@ def format_slack_message(dates, data):
 
 def send_to_slack(message):
     client = WebClient(token=SLACK_TOKEN)
-    client.chat_postMessage(channel=SLACK_CHANNEL, text=message)
-    print("Message sent to Slack.")
+    for channel in SLACK_CHANNELS:
+        client.chat_postMessage(channel=channel, text=message)
+        print(f"Message sent to {channel}.")
 
 
 def main():

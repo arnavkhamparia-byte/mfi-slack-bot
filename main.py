@@ -114,9 +114,10 @@ def send_to_slack(message):
 
 
 def main():
-    if not is_within_business_hours():
-        print("Outside business hours (9AM–7PM IST). Skipping.")
-        return
+    # Business hours check disabled during testing — re-enable after verification
+    # if not is_within_business_hours():
+    #     print("Outside business hours (9AM–7PM IST). Skipping.")
+    #     return
 
     dates = get_last_7_days()
     print(f"Fetching data for {dates[0]} to {dates[-1]}...")

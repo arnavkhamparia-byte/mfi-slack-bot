@@ -24,4 +24,5 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_MY_USER_ID: ${{ secrets.SLACK_MY_USER_ID }}
         run: python main.py

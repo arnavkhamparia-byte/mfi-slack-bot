@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '*/30 3-13 * * 1-6'  # Every 30 min, 3:00–13:30 UTC = 8:30AM–7:00PM IST (Mon–Sat)
   workflow_dispatch:              # Allow manual trigger from GitHub UI
+  repository_dispatch:           # Allow external trigger (cron-job.org)
+    types: [trigger]
 
 jobs:
   send-table:

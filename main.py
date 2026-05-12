@@ -13,8 +13,7 @@ DB_NAME = "fusion_finance_mfi"
 DB_USER = "readonly"
 DB_PASS = "readonly"
 
-WEBHOOK_MY_DM   = os.environ["WEBHOOK_MY_DM"]
-WEBHOOK_CHANNEL = os.environ["WEBHOOK_CHANNEL"]
+WEBHOOK_URL = os.environ["WEBHOOK_URL"]
 
 HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 HOUR_LABELS = [
@@ -108,14 +107,13 @@ def format_slack_message(dates, data):
 
 def send_to_slack(message):
     payload = json.dumps({"text": message}).encode()
-    for name, url in [("My DM", WEBHOOK_MY_DM), ("Channel", WEBHOOK_CHANNEL)]:
-        req = urllib.request.Request(
-            url, data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        resp = urllib.request.urlopen(req)
-        print(f"Sent to {name}: {resp.status}")
+    req = urllib.request.Request(
+        WEBHOOK_URL, data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+    resp = urllib.request.urlopen(req)
+    print(f"Sent to Slack: {resp.status}")
 
 
 def main():

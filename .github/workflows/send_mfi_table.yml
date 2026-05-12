@@ -22,6 +22,5 @@ jobs:
 
       - name: Run script
         env:
-          WEBHOOK_MY_DM: ${{ secrets.WEBHOOK_MY_DM }}
-          WEBHOOK_CHANNEL: ${{ secrets.WEBHOOK_CHANNEL }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
         run: python main.py

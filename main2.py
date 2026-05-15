@@ -333,13 +333,8 @@ def format_section4(data, now_ist):
     rows = []
     for disp in DISPOSITIONS:
         hour_data = data.get(disp, {})
-        if not any(hour_data.get(h, 0) for h in HOUR_SLOTS):
-            continue
         row = f"{disp:<{lw}}" + "".join(f"{hour_data.get(h, 0):>{cw}}" for h in HOUR_SLOTS)
         rows.append(row)
-
-    if not rows:
-        rows = ["No data for today"]
 
     table = "\n".join([header, sep] + rows)
 

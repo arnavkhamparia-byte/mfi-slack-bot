@@ -1,9 +1,9 @@
 name: Send MFI Dashboard to Slack
 
 on:
-  schedule:
-    - cron: "30 3-14 * * 1-6"   # Every hour 9AM–8PM IST (UTC+5:30), Mon–Sat
-  workflow_dispatch:             # Allow manual trigger from GitHub UI
+  workflow_dispatch:              # Allow manual trigger from GitHub UI
+  repository_dispatch:           # Allow external trigger (cron-job.org)
+    types: [trigger_dashboard]
 
 jobs:
   send-dashboard:

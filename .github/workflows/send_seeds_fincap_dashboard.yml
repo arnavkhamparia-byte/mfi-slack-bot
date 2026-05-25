@@ -1,0 +1,26 @@
+name: Send Seeds Fincap Dashboard to Slack
+
+on:
+  workflow_dispatch:              # Allow manual trigger from GitHub UI
+  repository_dispatch:           # Allow external trigger (cron-job.org)
+    types: [trigger_seeds_fincap]
+
+jobs:
+  send-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        env:
+          WEBHOOK_URL_4: ${{ secrets.WEBHOOK_URL_4 }}
+        run: python main4.py

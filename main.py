@@ -120,6 +120,8 @@ def send_to_slack(message, max_retries=3):
             print(f"Sent to Slack: {resp.status}")
             return
         except urllib.error.HTTPError as e:
+            body = e.read().decode(errors="replace")
+            print(f"Slack error {e.code}: {dict(e.headers)} body={body!r}")
             if e.code == 429 and attempt < max_retries - 1:
                 retry_after = int(e.headers.get("Retry-After", 1))
                 print(f"Rate limited by Slack (429), retrying in {retry_after}s...")

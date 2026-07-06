@@ -1,7 +1,9 @@
 import os
 import psycopg2
 import urllib.request
+import urllib.error
 import json
+import time
 from datetime import datetime, timedelta
 import pytz
 
@@ -105,15 +107,25 @@ def format_slack_message(dates, data):
     return message
 
 
-def send_to_slack(message):
+def send_to_slack(message, max_retries=3):
     payload = json.dumps({"text": message}).encode()
-    req = urllib.request.Request(
-        WEBHOOK_URL, data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST"
-    )
-    resp = urllib.request.urlopen(req)
-    print(f"Sent to Slack: {resp.status}")
+    for attempt in range(max_retries):
+        req = urllib.request.Request(
+            WEBHOOK_URL, data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        try:
+            resp = urllib.request.urlopen(req)
+            print(f"Sent to Slack: {resp.status}")
+            return
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < max_retries - 1:
+                retry_after = int(e.headers.get("Retry-After", 1))
+                print(f"Rate limited by Slack (429), retrying in {retry_after}s...")
+                time.sleep(retry_after)
+                continue
+            raise
 
 
 def main():
